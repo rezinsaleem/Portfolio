@@ -455,22 +455,25 @@
             <form  id="submit-form" action="https://script.google.com/macros/s/AKfycbzamjUCVuSfCRommY8byAFs3b7QztfsAckjdfn68SMYRfZPjCUP3A8TxnaMWkon7EHn/exec" method="post" role="form" class="php-email-form">
               <div class="row">
                 <div class="col-md-6 form-group">
-                  <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" autocomplete="on" required>
+                  <input type="text" name="name" class="form-control" id="name" placeholder="Your Name" autocomplete="on" onkeyup="validateName()" required>
+                  <span id="name-error"></span>
                 </div>
                 <div class="col-md-6 form-group mt-3 mt-md-0">
-                  <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" autocomplete="on" required>
+                  <input type="email" class="form-control" name="email" id="email" placeholder="Your Email" autocomplete="on" onkeyup="validateEmail()" required>
+                  <span id="email-error"></span>
                 </div>
               </div>
               <div class="form-group mt-3">
                 <input type="text" class="form-control" name="subject" id="subject" placeholder="Subject" required>
               </div>
               <div class="form-group mt-3">
-                <textarea class="form-control" name="message" rows="5" placeholder="Message" required></textarea>
+                <textarea class="form-control" name="message" id="message" rows="5" placeholder="Message" onkeyup="validateMessage()" required></textarea>
+                <span id="message-error"></span>
               </div>
-              <div class="my-3">
-                <div class="loading">Loading</div>
+              <!--<div class="my-3">
+                <div class="loading">Loading</div>-->
                 
-              <div class="text-center"><button type="submit">Send Message</button></div>
+              <div class="text-center"><button type="submit" onclick="return validateForm()">Send Message</button></div>
             </form>
 
           </div>
@@ -478,6 +481,73 @@
         </div>
 
       </div>
+
+      <script>
+
+        var nameError = document.getElementById('name-error');
+        var emailError = document.getElementById('email-error');
+        var messageError = document.getElementById('message-error');
+        var submitError = document.getElementById('submit-error');
+        
+        function validateName()
+        {
+            var name = document.getElementById('name').value;
+            if(name.length ==0)
+            {
+                nameError.innerHTML ='name is required'
+                return false;
+            }
+            if(!name.match(/^[A-Za-z]+( [A-Za-z]+)/)){
+                nameError.innerHTML ='write your full name';
+                return false;
+                
+            }
+            nameError.innerHTML = '<i class="uil uil-check-circle"></i>';
+            return true;
+        }
+        function validateEmail()
+        {
+            var email = document.getElementById('email').value;
+            if(email.length==0)
+            {
+                emailError.innerHTML ='email is required'
+                return false;
+            }
+            if(!email.match(/^[A-Za-z\._\-[0-9]+@[A-Za-z]+\.[a-z]{2,}$/))
+            {
+                emailError.innerHTML ='Email is invalid'
+                return false;
+            }
+            emailError.innerHTML = '<i class="uil uil-check-circle"></i>';
+            return true;
+        }
+        function validateMessage()
+        {
+            var message = document.getElementById('message').value;
+            var required =25;
+            var left = required - message.length;
+            if(left>0)
+            {
+                messageError.innerHTML = left +'more characters required';
+                return false;
+            }
+        
+            messageError.innerHTML= '<i class="uil uil-check-circle"></i>';
+            return true;
+        }
+        function validateForm()
+        {
+            if(!validateName() || !validateEmail() || !validateMessage())
+            {
+                submitError.style.display ='block';
+                submitError.innerHTML = 'please fill the all field';
+                setTimeout(function(){submitError.style.display ='none';}, 3000);
+                return false;
+              
+            }
+        }
+        </script>
+
     </section><!-- End Contact Section -->
 
   </main><!-- End #main -->
@@ -520,6 +590,10 @@
   <script>
     $("#submit-form").submit((e)=>{
         e.preventDefault()
+        const response = validateForm()
+        if(response == false){
+          return
+        }
         $.ajax({
             url:"https://script.google.com/macros/s/AKfycbzamjUCVuSfCRommY8byAFs3b7QztfsAckjdfn68SMYRfZPjCUP3A8TxnaMWkon7EHn/exec",
             data:$("#submit-form").serialize(),
